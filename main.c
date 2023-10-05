@@ -25,23 +25,7 @@ float velocity = 200;
 int scale = 4;
 
 int main(void)
-{
-    sp *sprite = malloc(sizeof(sp));
-    // sp follower;
-
-    sprite->sprite = LoadTexture("tile_0121.png");
-    sprite->pos = (Vector2){0, 10};
-    sprite->sprite_height = sprite->sprite.height * scale;
-    sprite->sprite_width = sprite->sprite.height * scale;
-    
-    spriteClamp(sprite);
-
-    // follower.sprite = LoadTexture("tile_0123.png");
-    // follower.sprite_height = sprite.sprite.height * scale;
-    // follower.sprite_width = sprite.sprite.width * scale;
-    // follower.pos = (Vector2){width - follower.sprite_width, 10};
-    // spriteClamp(follower);
-
+{    
     Sound sound;
     // Music music;
 
@@ -52,20 +36,38 @@ int main(void)
     // music = LoadMusicStream("dirediredocks.mp3");
     // PlayMusicStream(music);
 
+    sp sprite;
+    sp follower;
+
+    sprite.sprite = LoadTexture("tile_0121.png");
+    sprite.pos = (Vector2){0, 10};
+    sprite.sprite_height = sprite.sprite.height * scale;
+    sprite.sprite_width = sprite.sprite.height * scale;
+    
+    printf("clamp: %f, %f\nmax: %f, %f\nmin: %f, %f\n", sprite.clamp.x, sprite.clamp.y, sprite.max.x, sprite.max.y, sprite.min.x, sprite.min.y);
+
+    follower.sprite = LoadTexture("tile_0123.png");
+    follower.sprite_height = sprite.sprite.height * scale;
+    follower.sprite_width = sprite.sprite.width * scale;
+    follower.pos = (Vector2){width - follower.sprite_width, 10};
+
     while (!WindowShouldClose())
     {
         // UpdateMusicStream(music);
 
         float speed = GetFrameTime() * velocity;
 
-        sprite->pos = checkMovement(sprite, speed);
+        sprite.pos = checkMovement(&sprite, speed);
+        spriteClamp(&sprite);
+
         // follower_pos = followerMovement(follower_pos, pos);
+        spriteClamp(&follower);
 
         Rectangle spriteRect = {
-            sprite->pos.x,
-            sprite->pos.y,
-            sprite->sprite_width,
-            sprite->sprite_height
+            sprite.pos.x,
+            sprite.pos.y,
+            sprite.sprite_width,
+            sprite.sprite_height
         };
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -78,8 +80,8 @@ int main(void)
 
         BeginDrawing();
             ClearBackground(GRAY);
-            DrawTextureEx(sprite->sprite, sprite->pos, 0, scale, RED);
-            // DrawTextureEx(follower.sprite, follower.pos, 0, scale, GRAY);
+            DrawTextureEx(sprite.sprite, sprite.pos, 0, scale, RED);
+            DrawTextureEx(follower.sprite, follower.pos, 0, scale, GRAY);
         EndDrawing();
     }
     // StopMusicStream(music);
@@ -93,7 +95,6 @@ int main(void)
 
 Vector2 checkMovement(sp *sprite, float speed)
 {
-
     if (IsKeyDown(KEY_D) && sprite->clamp.x != sprite->max.x)
         sprite->pos.x += speed;
     if (IsKeyDown(KEY_A) && sprite->clamp.x != sprite->min.x)
@@ -103,7 +104,6 @@ Vector2 checkMovement(sp *sprite, float speed)
     if (IsKeyDown(KEY_S) && sprite->clamp.y != sprite->max.y)
         sprite->pos.y += speed;
 
-    printf("%f, %f\n", sprite->clamp.x, sprite->clamp.y);
     return sprite->pos;
 }
 
