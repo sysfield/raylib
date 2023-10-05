@@ -58,14 +58,14 @@ int main(void)
 
         float speed = GetFrameTime() * velocity;
 
-        sprite.pos = checkMovement(sprite, speed);
+        sprite->pos = checkMovement(sprite, speed);
         // follower_pos = followerMovement(follower_pos, pos);
 
         Rectangle spriteRect = {
-            sprite.pos.x,
-            sprite.pos.y,
-            sprite.sprite_width,
-            sprite.sprite_height
+            sprite->pos.x,
+            sprite->pos.y,
+            sprite->sprite_width,
+            sprite->sprite_height
         };
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -78,7 +78,7 @@ int main(void)
 
         BeginDrawing();
             ClearBackground(GRAY);
-            DrawTextureEx(sprite.sprite, sprite.pos, 0, scale, RED);
+            DrawTextureEx(sprite->sprite, sprite->pos, 0, scale, RED);
             // DrawTextureEx(follower.sprite, follower.pos, 0, scale, GRAY);
         EndDrawing();
     }
@@ -94,23 +94,23 @@ int main(void)
 Vector2 checkMovement(sp *sprite, float speed)
 {
 
-    if (IsKeyDown(KEY_D) && sprite.clamp.x != sprite.max.x)
-        sprite.pos.x += speed;
-    if (IsKeyDown(KEY_A) && sprite.clamp.x != sprite.min.x)
-        sprite.pos.x -= speed;
-    if (IsKeyDown(KEY_W) && sprite.clamp.y != sprite.min.y)
-        sprite.pos.y -= speed;
-    if (IsKeyDown(KEY_S) && sprite.clamp.y != sprite.max.y)
-        sprite.pos.y += speed;
+    if (IsKeyDown(KEY_D) && sprite->clamp.x != sprite->max.x)
+        sprite->pos.x += speed;
+    if (IsKeyDown(KEY_A) && sprite->clamp.x != sprite->min.x)
+        sprite->pos.x -= speed;
+    if (IsKeyDown(KEY_W) && sprite->clamp.y != sprite->min.y)
+        sprite->pos.y -= speed;
+    if (IsKeyDown(KEY_S) && sprite->clamp.y != sprite->max.y)
+        sprite->pos.y += speed;
 
-    printf("%f, %f\n", sprite.clamp.x, sprite.clamp.y);
-    return sprite.pos;
+    printf("%f, %f\n", sprite->clamp.x, sprite->clamp.y);
+    return sprite->pos;
 }
 
 sp spriteClamp(sp *sprite)
 {
-    sprite.min = (Vector2){0, 0};
-    sprite.max = (Vector2){width - sprite.sprite_width, height - sprite.sprite_height};
+    sprite->min = (Vector2){0, 0};
+    sprite->max = (Vector2){width - sprite->sprite_width, height - sprite->sprite_height};
 
-    sprite.clamp = Vector2Clamp(sprite.pos, sprite.min, sprite.max);
+    sprite->clamp = Vector2Clamp(sprite->pos, sprite->min, sprite->max);
 }
