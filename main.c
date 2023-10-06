@@ -15,9 +15,9 @@ typedef struct sprite
     Vector2 clamp;
 } sp;
 
-Vector2 checkMovement(sp *sprite, float speed);
+sp checkMovement(sp *sprite, float speed);
 sp spriteClamp(sp *sprite);
-// Vector2 followerMovement(Vector2 follower_position, Vector2 position);
+// sp followerMovement(Vector2 follower_position, Vector2 position);
 
 int width = 800;
 int height = 450;
@@ -61,7 +61,7 @@ int main(void)
 
         float speed = GetFrameTime() * velocity;
 
-        sprite.pos = checkMovement(&sprite, speed);
+        checkMovement(&sprite, speed);
         spriteClamp(&sprite);
 
         // follower_pos = followerMovement(follower_pos, pos);
@@ -98,7 +98,7 @@ int main(void)
     return 0;
 }
 
-Vector2 checkMovement(sp *sprite, float speed)
+sp checkMovement(sp *sprite, float speed)
 {
     if (IsKeyDown(KEY_D) && sprite->clamp.x != sprite->max.x)
         sprite->pos.x += speed;
@@ -108,8 +108,6 @@ Vector2 checkMovement(sp *sprite, float speed)
         sprite->pos.y -= speed;
     if (IsKeyDown(KEY_S) && sprite->clamp.y != sprite->max.y)
         sprite->pos.y += speed;
-
-    return sprite->pos;
 }
 
 sp spriteClamp(sp *sprite)
