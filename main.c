@@ -125,10 +125,7 @@ npc followerMovement(npc *npc, sp *target, float speed)
             npc->sp.pos = Vector2Add(npc->sp.pos, move_this_frame);
             printf("%f, %f\n", move_this_frame.x, move_this_frame.y);
         }
-        // move_this_frame = Vector2Scale(target_location, speed);
-        // printf("move_this_frame: %f, %f\n", move_this_frame.x, move_this_frame.y);
 
-        // // sprite->pos = Vector2Subtract(target_location, move_this_frame);
         printf("sprite: %f, %f\n", target->pos.x, target->pos.y);
         printf("target_location: %f, %f\n", npc->target_location.x, npc->target_location.y);
         printf("follower: %f, %f\n", npc->sp.pos.x, npc->sp.pos.y);
