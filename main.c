@@ -29,6 +29,8 @@ int main(void)
     Sound sound;
     // Music music;
 
+    SetConfigFlags(FLAG_VSYNC_HINT);
+
     InitWindow(width, height, "title");
     InitAudioDevice();
 
@@ -82,6 +84,7 @@ int main(void)
 
         BeginDrawing();
             ClearBackground(GRAY);
+            DrawFPS(10, height - 20);
             DrawTextureEx(sprite.sprite, sprite.pos, 0, scale, RED);
             DrawTextureEx(follower.sprite, follower.pos, 0, scale, GRAY);
         EndDrawing();
