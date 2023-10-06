@@ -32,6 +32,8 @@ int main(void)
     InitWindow(width, height, "title");
     InitAudioDevice();
 
+    SetTargetFPS(60);
+
     sound = LoadSound("star.wav");
     // music = LoadMusicStream("dirediredocks.mp3");
     // PlayMusicStream(music);
