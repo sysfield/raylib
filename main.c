@@ -10,6 +10,7 @@ typedef struct sprite
     Vector2 pos;
     int sprite_height;
     int sprite_width;
+    bool visible;
     Vector2 min;
     Vector2 max;
     Vector2 clamp;
@@ -24,6 +25,7 @@ typedef struct npc
 
 float sign(float z);
 sp checkMovement(sp *sprite, float speed);
+sp checkVisible(sp *sprite);
 sp spriteClamp(sp *sprite);
 npc followerMovement(npc *npc, sp *target, float speed);
 
@@ -56,13 +58,13 @@ int main(void)
     sprite.pos = (Vector2){0, 10};
     sprite.sprite_height = sprite.sprite.height * scale;
     sprite.sprite_width = sprite.sprite.height * scale;
+    sprite.visible = true;
     
-    // printf("clamp: %f, %f\nmax: %f, %f\nmin: %f, %f\n", sprite.clamp.x, sprite.clamp.y, sprite.max.x, sprite.max.y, sprite.min.x, sprite.min.y);
-
     follower.sp.sprite = LoadTexture("tile_0123.png");
     follower.sp.sprite_height = sprite.sprite.height * scale;
     follower.sp.sprite_width = sprite.sprite.width * scale;
     follower.sp.pos = (Vector2){width - follower.sp.sprite_width, 10};
+    follower.sp.visible = true;
 
     while (!WindowShouldClose())
     {
@@ -71,12 +73,13 @@ int main(void)
         float speed = GetFrameTime() * velocity;
 
         checkMovement(&sprite, speed);
+        checkVisible(&sprite);
         spriteClamp(&sprite);
 
         follower.base_distance = Vector2Distance(follower.sp.pos, sprite.pos);
         follower.target_location = Vector2MoveTowards(sprite.pos, follower.sp.pos, 20);
         followerMovement(&follower, &sprite, speed / 2);
-        // spriteClamp(&follower.sp);
+        spriteClamp(&follower.sp);
 
         BeginDrawing();
             ClearBackground(GRAY);
@@ -106,29 +109,43 @@ sp checkMovement(sp *sprite, float speed)
         sprite->pos.y += speed;
 }
 
+sp checkVisible(sp *sprite)
+{
+    if (IsKeyDown(KEY_SPACE))
+    {
+        sprite->visible = false;
+    }
+    else
+    {
+        sprite->visible = true;
+    }
+}
+
 npc followerMovement(npc *npc, sp *target, float speed)
 {
     Vector2 move_this_frame = {0, 0};
     Vector2 difference;
 
-    if (npc->base_distance <= distance + npc->sp.sprite_width)
+    if (target->visible)
+    {
+        printf("true\n");
+    }
+    else
+    {
+        printf("false\n");
+    }
+
+    if (npc->base_distance <= distance + npc->sp.sprite_width && target->visible)
     {
         difference = Vector2Subtract(npc->target_location, npc->sp.pos);
         difference.x = sign(difference.x);
         difference.y = sign(difference.y);
 
-        if (npc->base_distance != 0)
+        if (npc->base_distance != 0) 
         {
-            move_this_frame = Vector2Scale(difference, speed);
-            // move_this_frame.x = roundf(move_this_frame.x);
-            // move_this_frame.y = roundf(move_this_frame.y);
-            npc->sp.pos = Vector2Add(npc->sp.pos, move_this_frame);
-            printf("%f, %f\n", move_this_frame.x, move_this_frame.y);
-        }
-
-        printf("sprite: %f, %f\n", target->pos.x, target->pos.y);
-        printf("target_location: %f, %f\n", npc->target_location.x, npc->target_location.y);
-        printf("follower: %f, %f\n", npc->sp.pos.x, npc->sp.pos.y);
+                move_this_frame = Vector2Scale(difference, speed);
+                npc->sp.pos = Vector2Add(npc->sp.pos, move_this_frame);
+        }   
     }
 
 }
