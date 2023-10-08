@@ -14,6 +14,7 @@ typedef struct sprite
     Vector2 min;
     Vector2 max;
     Vector2 clamp;
+    Color colour;
 } sp;
 
 typedef struct npc
@@ -59,6 +60,7 @@ int main(void)
     sprite.sprite_height = sprite.sprite.height * scale;
     sprite.sprite_width = sprite.sprite.height * scale;
     sprite.visible = true;
+    sprite.colour = RED;
     
     follower.sp.sprite = LoadTexture("tile_0123.png");
     follower.sp.sprite_height = sprite.sprite.height * scale;
@@ -84,7 +86,7 @@ int main(void)
         BeginDrawing();
             ClearBackground(GRAY);
             DrawFPS(10, height - 20);
-            DrawTextureEx(sprite.sprite, sprite.pos, 0, scale, RED);
+            DrawTextureEx(sprite.sprite, sprite.pos, 0, scale, sprite.colour);
             DrawTextureEx(follower.sp.sprite, follower.sp.pos, 0, scale, GRAY);
         EndDrawing();
     }
@@ -114,10 +116,12 @@ sp checkVisible(sp *sprite)
     if (IsKeyDown(KEY_SPACE))
     {
         sprite->visible = false;
+        sprite->colour = ORANGE;
     }
     else
     {
         sprite->visible = true;
+        sprite->colour = RED;
     }
 }
 
