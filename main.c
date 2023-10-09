@@ -4,6 +4,11 @@
 #include "raylib.h"
 #include "raymath.h"
 
+typedef struct tmr
+{
+    float lifetime;
+} tmr;
+
 typedef struct sprite
 {
     Texture2D sprite;
@@ -11,6 +16,8 @@ typedef struct sprite
     int sprite_height;
     int sprite_width;
     bool visible;
+    tmr visible_tmr;
+    float visible_lifetime;
     Vector2 min;
     Vector2 max;
     Vector2 clamp;
@@ -24,14 +31,17 @@ typedef struct npc
     Vector2 target_location;
 } npc;
 
+void startTimer(tmr *tmr, float lifetime);
+void updateTimer(tmr *tmr);
+bool timerDone(tmr *tmr);
 float sign(float z);
 sp checkMovement(sp *sprite, float speed);
 sp checkVisible(sp *sprite);
 sp spriteClamp(sp *sprite);
 npc followerMovement(npc *npc, sp *target, float speed);
 
-int width = 800;
-int height = 450;
+int width = 640;
+int height = 360;
 float velocity = 200;
 int scale = 4;
 float distance = 150;
@@ -61,6 +71,8 @@ int main(void)
     sprite.sprite_width = sprite.sprite.height * scale;
     sprite.visible = true;
     sprite.colour = RED;
+    sprite.visible_tmr = (tmr){0};
+    sprite.visible_lifetime = 2;
     
     follower.sp.sprite = LoadTexture("tile_0123.png");
     follower.sp.sprite_height = sprite.sprite.height * scale;
@@ -80,7 +92,7 @@ int main(void)
 
         follower.base_distance = Vector2Distance(follower.sp.pos, sprite.pos);
         follower.target_location = Vector2MoveTowards(sprite.pos, follower.sp.pos, 20);
-        followerMovement(&follower, &sprite, speed / 2);
+        followerMovement(&follower, &sprite, speed);
         spriteClamp(&follower.sp);
 
         BeginDrawing();
@@ -113,7 +125,23 @@ sp checkMovement(sp *sprite, float speed)
 
 sp checkVisible(sp *sprite)
 {
+    if (IsKeyPressed(KEY_SPACE))
+    {
+        startTimer(&sprite->visible_tmr, sprite->visible_lifetime);
+    }
+    
     if (IsKeyDown(KEY_SPACE))
+    {
+        updateTimer(&sprite->visible_tmr);
+    }
+    else
+    {
+        sprite->visible_tmr.lifetime = 0;
+    }
+
+    printf("%f\n", sprite->visible_tmr.lifetime);
+
+    if (!timerDone(&sprite->visible_tmr))
     {
         sprite->visible = false;
         sprite->colour = ORANGE;
@@ -129,15 +157,6 @@ npc followerMovement(npc *npc, sp *target, float speed)
 {
     Vector2 move_this_frame = {0, 0};
     Vector2 difference;
-
-    if (target->visible)
-    {
-        printf("true\n");
-    }
-    else
-    {
-        printf("false\n");
-    }
 
     if (npc->base_distance <= distance + npc->sp.sprite_width && target->visible)
     {
@@ -167,4 +186,30 @@ float sign(float z)
     z = (z > 0) - (z < 0);
 
     return z;
+}
+
+// start *tmr with a specific (float) lifetime
+void startTimer(tmr *tmr, float lifetime)
+{
+    if (tmr != NULL)
+    {
+        tmr->lifetime = lifetime;
+    }
+}
+
+void updateTimer(tmr *tmr)
+{
+    // subtract time since last frame from tmr if not ended
+    if (tmr != NULL && tmr->lifetime > 0)
+    {
+        tmr->lifetime -= GetFrameTime();
+    }
+}
+
+bool timerDone(tmr *tmr)
+{
+    if (tmr != NULL)
+    {
+        return tmr->lifetime <= 0;
+    }
 }
