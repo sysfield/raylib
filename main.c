@@ -123,7 +123,7 @@ int main(void)
 void gameInit()
 {
     sprite.sprite = LoadTexture("tile_0121.png");
-    sprite.pos.pos = (Vector2){0, 10};
+    sprite.pos.pos = (Vector2){width / 2, height / 2};
     sprite.pos.sprite_height = sprite.sprite.height * scale;
     sprite.pos.sprite_width = sprite.sprite.height * scale;
     sprite.pos.cpos = (Vector2){ sprite.pos.pos.x + (sprite.pos.sprite_width / 2), sprite.pos.pos.y + (sprite.pos.sprite_height / 2) };
@@ -133,9 +133,10 @@ void gameInit()
     sprite.colour = RED;
     
     follower.sprite = LoadTexture("tile_0123.png");
-    follower.pos.sprite_height = sprite.sprite.height * scale;
-    follower.pos.sprite_width = sprite.sprite.width * scale;
-    follower.pos.pos = (Vector2){width - follower.pos.sprite_width, 10};
+    follower.pos.sprite_height = follower.sprite.height * scale;
+    follower.pos.sprite_width = follower.sprite.width * scale;
+    follower.pos.pos = (Vector2){ width - follower.pos.sprite_width, 10 };
+    follower.pos.cpos = (Vector2){ follower.pos.pos.x + (follower.pos.sprite_width / 2), follower.pos.pos.y + (follower.pos.sprite_height / 2) };
 }
 
 bool gameUpdate()
@@ -145,35 +146,47 @@ bool gameUpdate()
 
 void gameDraw()
 {
-    Color line_colour;
-    line_colour = BLACK;
-
     Rectangle follower_rect = { follower.pos.pos.x, follower.pos.pos.y, follower.pos.sprite_width, follower.pos.sprite_height };
+    Vector2 ep;
+    Vector2 points[360 / 5 + 1];
+    int points_len;
+
+    points[0] = sprite.pos.cpos;
+    points_len = sizeof(points) / sizeof(points[0]);
 
     BeginDrawing();
         ClearBackground(GRAY);
         DrawFPS(10, height - 20);
-        for (float i = 0; i < 360; i += 5)
+        for (int i = 0; i < 360; i += 5)
         {
             Vector2 v = { cosf(DEG2RAD * i), sinf(DEG2RAD * i) };
-            Vector2 ep = Vector2Add(sprite.pos.cpos, Vector2Scale(v, distance));
-            DrawLineEx(sprite.pos.cpos, ep, 1, line_colour);
-            if (CheckCollisionPointRec(ep, follower_rect))
-            {
-                line_colour = YELLOW;
-            }
+            ep = Vector2Add(sprite.pos.cpos, Vector2Scale(v, distance));
+
+            points[(i + points_len) % points_len] = ep;
+            // points_f[(i + points_len) % points_len] = ep_f;
+            DrawLineEx(sprite.pos.cpos, ep, 1, CheckCollisionPointRec(ep, follower_rect) ? YELLOW : BLACK);
         }
+
+        // for (int i = 0; i < points_len; i++)
+        // {
+        //     DrawLineEx(sprite.pos.cpos, points[i], 1, CheckCollisionPointRec(points[i], follower_rect) ? YELLOW : BLACK);
+        //     // DrawLineEx(follower.pos.cpos, ep_f, 1, CheckCollisionPointRec(ep, follower_rect) ? YELLOW : BLACK);
+        // }
 
         DrawTexturePro( (Texture2D)sprite.sprite, 
             (Rectangle){ 0, 0, (float)sprite.sprite.width, (float)sprite.sprite.height },
-            (Rectangle){ sprite.pos.cpos.x, sprite.pos.cpos.y, (float)sprite.sprite.width, (float)sprite.sprite.height},
+            (Rectangle){ sprite.pos.cpos.x, sprite.pos.cpos.y, (float)sprite.sprite.width, (float)sprite.sprite.height },
             (Vector2){ sprite.sprite.width * 0.5, sprite.sprite.height * 0.5 },
             0,
             sprite.colour
         );
         DrawTextureEx(follower.sprite, follower.pos.pos, 0, scale, GRAY);
-        DrawRectangleLines(follower.pos.pos.x, follower.pos.pos.y, follower.pos.sprite_width, follower.pos.sprite_height, MAROON);
-        
+        DrawLineV(follower.pos.pos, (Vector2){follower.pos.pos.x + follower.pos.sprite_width, follower.pos.pos.y}, GREEN);
+        DrawLineV(follower.pos.pos, (Vector2){follower.pos.pos.x, follower.pos.pos.y + follower.pos.sprite_height}, ORANGE);
+        DrawLineV((Vector2){follower.pos.pos.x + follower.pos.sprite_width, follower.pos.pos.y + follower.pos.sprite_height}, (Vector2){follower.pos.pos.x + follower.pos.sprite_width, follower.pos.pos.y}, MAROON);
+        DrawLineV((Vector2){follower.pos.pos.x, follower.pos.pos.y + follower.pos.sprite_height}, (Vector2){follower.pos.pos.x + follower.pos.sprite_width, follower.pos.pos.y + follower.pos.sprite_height}, YELLOW);
+        // DrawRectangle(follower.pos.pos.x, follower.pos.pos.y, follower.pos.sprite_width, follower.pos.sprite_height, MAROON);
+        // DrawTriangleFan(points, 14, RED);
     EndDrawing();
 }
 
@@ -189,9 +202,6 @@ sp checkMovement(sp *sprite, float speed)
         sprite->pos.pos.y += speed;
 
     sprite->pos.cpos = sprite->pos.pos;
-    
-    printf("cpos: %f, %f\n", sprite->pos.cpos.x, sprite->pos.cpos.y);
-    printf("pos: %f, %f\n", sprite->pos.pos.x, sprite->pos.pos.y);
 }
 
 sp checkVisible(invis *invis, Color *colour)
@@ -204,10 +214,11 @@ sp checkVisible(invis *invis, Color *colour)
     if (IsKeyDown(KEY_SPACE))
     {
         updateTimer(&invis->visible_tmr);
-    }    else
-    {
-        invis->visible_tmr.lifetime = 0;
     }
+    // else
+    // {
+    //     invis->visible_tmr.lifetime = 0;
+    // }
 
     printf("%f\n", invis->visible_tmr.lifetime);
 
@@ -238,6 +249,8 @@ npc followerMovement(npc *npc, sp *target, float speed)
         {
                 move_this_frame = Vector2Scale(difference, speed);
                 npc->pos.pos = Vector2Add(npc->pos.pos, move_this_frame);
+
+                npc->pos.cpos = Vector2Add(npc->pos.cpos, move_this_frame);
         }   
     }
 

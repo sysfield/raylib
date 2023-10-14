@@ -7,7 +7,7 @@
 			"command": "/sbin/gcc",
 			"args": [
 				"-fdiagnostics-color=always",
-				"-g",
+				"-g3",
 				"${file}",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}",
